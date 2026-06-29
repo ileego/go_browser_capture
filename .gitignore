@@ -105,3 +105,8 @@ coverage/
 
 # Generated Icons
 extension/icons/*.png.bak
+
+# Test Files
+backend/login.json
+backend/batch_test.json
+backend/dy/
