@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser DOM Capture - 管理后台</title>
+    <link rel="stylesheet" href="/admin/css/style.css">
+</head>
+<body class="admin-body">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 128 128" fill="none">
+                    <defs>
+                        <linearGradient id="bgGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#3B82F6"/>
+                            <stop offset="100%" style="stop-color:#10B981"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="64" cy="64" r="56" fill="url(#bgGrad2)"/>
+                    <rect x="24" y="36" width="80" height="68" rx="8" fill="white"/>
+                    <rect x="32" y="56" width="64" height="24" rx="4" fill="#3B82F6"/>
+                </svg>
+            </div>
+            <span>Browser DOM Capture</span>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="#dashboard" class="nav-link active" data-page="dashboard">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/>
+                        <rect x="14" y="3" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+                    仪表盘
+                </a></li>
+                <li><a href="#users" class="nav-link" data-page="users">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    用户管理
+                </a></li>
+                <li><a href="#roles" class="nav-link" data-page="roles">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 20V10"/>
+                        <path d="M18 20V4"/>
+                        <path d="M6 20v-6"/>
+                    </svg>
+                    权限管理
+                </a></li>
+                <li><a href="#configs" class="nav-link" data-page="configs">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    配置管理
+                </a></li>
+                <li><a href="#plugins" class="nav-link" data-page="plugins">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="9" y1="9" x2="15" y2="9"/>
+                        <line x1="9" y1="15" x2="15" y2="15"/>
+                    </svg>
+                    插件列表
+                </a></li>
+                <li><a href="#tasks" class="nav-link" data-page="tasks">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+                        <path d="M9 12l2 2 4-4"/>
+                    </svg>
+                    任务列表
+                </a></li>
+            </ul>
+        </nav>
+    </aside>
+    
+    <main class="main-content">
+        <header class="header">
+            <div class="header-left">
+                <h2 id="pageTitle">仪表盘</h2>
+            </div>
+            <div class="header-right">
+                <span id="currentUser">管理员</span>
+                <button id="logoutBtn" class="btn btn-outline">退出登录</button>
+            </div>
+        </header>
+        
+        <div id="errorMsg" class="error-message"></div>
+        
+        <div id="pageContent" class="page-content">
+            <div id="dashboard" class="page-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon stat-blue">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="9" y1="9" x2="15" y2="9"/>
+                                <line x1="9" y1="15" x2="15" y2="15"/>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="statPlugins">0</div>
+                            <div class="stat-label">已连接插件</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon stat-green">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+                                <path d="M9 12l2 2 4-4"/>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="statTasks">0</div>
+                            <div class="stat-label">任务总数</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon stat-yellow">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="statPending">0</div>
+                            <div class="stat-label">待处理任务</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon stat-red">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="statFailed">0</div>
+                            <div class="stat-label">失败任务</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="quick-actions">
+                    <h3>快速操作</h3>
+                    <button class="btn btn-primary" onclick="showModal('createConfig')">添加配置</button>
+                    <button class="btn btn-secondary" onclick="showModal('createUser')">添加用户</button>
+                    <button class="btn btn-outline" onclick="loadData()">刷新数据</button>
+                </div>
+            </div>
+            
+            <div id="users" class="page-section hidden">
+                <div class="section-header">
+                    <h3>用户列表</h3>
+                    <button class="btn btn-primary" onclick="showModal('createUser')">添加用户</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>用户名</th>
+                            <th>邮箱</th>
+                            <th>角色</th>
+                            <th>状态</th>
+                            <th>创建时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody"></tbody>
+                </table>
+            </div>
+            
+            <div id="roles" class="page-section hidden">
+                <div class="section-header">
+                    <h3>角色列表</h3>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>名称</th>
+                            <th>描述</th>
+                            <th>权限</th>
+                            <th>创建时间</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rolesTableBody"></tbody>
+                </table>
+            </div>
+            
+            <div id="configs" class="page-section hidden">
+                <div class="section-header">
+                    <h3>配置列表</h3>
+                    <button class="btn btn-primary" onclick="showModal('createConfig')">添加配置</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>域名</th>
+                            <th>选择器</th>
+                            <th>状态</th>
+                            <th>创建时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="configsTableBody"></tbody>
+                </table>
+            </div>
+            
+            <div id="plugins" class="page-section hidden">
+                <div class="section-header">
+                    <h3>插件列表</h3>
+                    <button class="btn btn-outline" onclick="loadPlugins()">刷新</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>状态</th>
+                            <th>当前任务数</th>
+                            <th>总处理任务</th>
+                            <th>平均响应时间</th>
+                            <th>最后心跳</th>
+                            <th>连接时间</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pluginsTableBody"></tbody>
+                </table>
+            </div>
+            
+            <div id="tasks" class="page-section hidden">
+                <div class="section-header">
+                    <h3>任务列表</h3>
+                    <div style="display: flex; gap: 12px;">
+                        <select id="taskStatusFilter" class="form-control" onchange="loadTasks()">
+                            <option value="">全部状态</option>
+                            <option value="PENDING">待处理</option>
+                            <option value="ASSIGNED">处理中</option>
+                            <option value="RUNNING">运行中</option>
+                            <option value="COMPLETED">已完成</option>
+                            <option value="FAILED">失败</option>
+                            <option value="TIMEOUT">超时</option>
+                        </select>
+                        <button class="btn btn-outline" onclick="loadTasks()">刷新</button>
+                    </div>
+                </div>
+                <div id="tasksStats"></div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>URL</th>
+                            <th>选择器</th>
+                            <th>状态</th>
+                            <th>插件</th>
+                            <th>错误信息</th>
+                            <th>创建时间</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tasksTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+    
+    <div id="modalOverlay" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">添加</h3>
+                <button class="modal-close" onclick="hideModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="hideModal()">取消</button>
+                <button class="btn btn-primary" id="modalSubmit">确定</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/admin/js/app.js"></script>
+</body>
+</html>

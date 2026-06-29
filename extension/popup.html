@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser DOM Capture</title>
+    <style>
+        body {
+            width: 350px;
+            padding: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            margin: 0;
+            color: #333;
+        }
+        
+        .status {
+            background: #f0f0f0;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .status-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .status-label {
+            color: #666;
+        }
+        
+        .status-value {
+            font-weight: 500;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        
+        .status-dot.connected {
+            background-color: #28a745;
+        }
+        
+        .status-dot.disconnected {
+            background-color: #dc3545;
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        
+        .button {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 8px;
+            transition: background 0.2s;
+        }
+        
+        .button:hover {
+            background: #0056b3;
+        }
+        
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .button.secondary {
+            background: #6c757d;
+        }
+        
+        .button.secondary:hover {
+            background: #545b62;
+        }
+        
+        .button.small {
+            padding: 6px 12px;
+            font-size: 12px;
+            margin-bottom: 0;
+        }
+        
+        .message {
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 12px;
+            font-size: 13px;
+            display: none;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .message.show {
+            display: block;
+        }
+        
+        .result {
+            margin-top: 12px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .result h3 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .result pre {
+            margin: 0;
+            font-size: 12px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Browser DOM Capture</h1>
+    </div>
+    
+    <div class="status">
+        <div class="status-item">
+            <span class="status-label">WebSocket:</span>
+            <span class="status-value">
+                <span class="status-dot" id="wsDot"></span>
+                <span id="wsStatus">连接中...</span>
+            </span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">插件ID:</span>
+            <span class="status-value" id="pluginId">-</span>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label for="wsUrlInput">WebSocket 地址</label>
+        <input type="text" id="wsUrlInput" placeholder="ws://localhost:8080/ws" value="ws://localhost:8080/ws">
+    </div>
+
+    <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+        <button class="button small" style="width: auto; flex: 1;" id="testWsBtn">测试连接</button>
+        <button class="button small secondary" style="width: auto; flex: 1;" id="saveConfigBtn">保存配置</button>
+    </div>
+
+    <div class="form-group">
+        <label for="urlInput">目标URL</label>
+        <input type="text" id="urlInput" placeholder="https://example.com" value="https://example.com">
+    </div>
+    
+    <div class="form-group">
+        <label for="selectorInput">DOM选择器</label>
+        <input type="text" id="selectorInput" placeholder="例如: .content, #main, h1" value="h1">
+    </div>
+    
+    <div class="form-group">
+        <label for="timeoutInput">超时时间(毫秒)</label>
+        <input type="number" id="timeoutInput" placeholder="30000" value="30000">
+    </div>
+    
+    <div class="form-group">
+        <label>随机延迟(毫秒)</label>
+        <div style="display: flex; gap: 8px;">
+            <input type="number" id="minDelayInput" placeholder="最小延迟" value="0" style="flex: 1;">
+            <span style="align-self: center;">-</span>
+            <input type="number" id="maxDelayInput" placeholder="最大延迟" value="2000" style="flex: 1;">
+        </div>
+        <div style="font-size: 11px; color: #888; margin-top: 4px;">当两个请求在1秒内到达时应用随机延迟，防止被识别为爬虫</div>
+    </div>
+    
+    <button class="button" id="captureBtn">开始捕捉</button>
+    <button class="button secondary" id="reconnectBtn">重新连接</button>
+    
+    <div class="message" id="message"></div>
+    
+    <div class="result" id="result">
+        <h3>捕捉结果</h3>
+        <pre id="resultContent"></pre>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,549 @@
+basePath: /api/v1
+definitions:
+  application.BatchCaptureRequest:
+    properties:
+      timeout:
+        type: integer
+      urls:
+        items:
+          type: string
+        type: array
+    required:
+    - urls
+    type: object
+  application.BatchCaptureResponse:
+    properties:
+      failed_count:
+        type: integer
+      results:
+        items:
+          $ref: '#/definitions/application.BatchCaptureResult'
+        type: array
+      success:
+        type: boolean
+      success_count:
+        type: integer
+      timestamp:
+        type: string
+      total:
+        type: integer
+    type: object
+  application.BatchCaptureResult:
+    properties:
+      config_id:
+        type: string
+      config_name:
+        type: string
+      data:
+        $ref: '#/definitions/websocket.CaptureData'
+      error:
+        type: string
+      success:
+        type: boolean
+      url:
+        type: string
+    type: object
+  application.CreateSelectorConfigRequest:
+    properties:
+      domain:
+        type: string
+      name:
+        type: string
+      regex:
+        type: string
+      selector:
+        type: string
+    required:
+    - domain
+    - name
+    - selector
+    type: object
+  application.SelectorConfigResponse:
+    properties:
+      domain:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      regex:
+        type: string
+      selector:
+        type: string
+    type: object
+  application.UpdateSelectorConfigRequest:
+    properties:
+      domain:
+        type: string
+      name:
+        type: string
+      regex:
+        type: string
+      selector:
+        type: string
+    required:
+    - domain
+    - name
+    - selector
+    type: object
+  websocket.CaptureData:
+    properties:
+      html:
+        type: string
+      text:
+        type: string
+    type: object
+  websocket.CaptureRequest:
+    properties:
+      action:
+        type: string
+      id:
+        type: string
+      selector:
+        type: string
+      timeout:
+        type: integer
+      url:
+        type: string
+    type: object
+  websocket.CaptureResponse:
+    properties:
+      data:
+        $ref: '#/definitions/websocket.CaptureData'
+      error:
+        type: string
+      id:
+        type: string
+      success:
+        type: boolean
+      timestamp:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a sample server for Go Chrome application with WebSocket support.
+  title: Go Chrome API
+  version: "1.0"
+paths:
+  /batch-capture:
+    post:
+      consumes:
+      - application/json
+      description: Receive URLs, match selector configs by domain, and send capture
+        requests to Chrome extension
+      parameters:
+      - description: Batch capture request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/application.BatchCaptureRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/application.BatchCaptureResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "503":
+          description: Service Unavailable
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Batch capture DOM from URLs
+      tags:
+      - capture
+  /capture:
+    post:
+      consumes:
+      - application/json
+      description: Send a capture request to Chrome extension via WebSocket
+      parameters:
+      - description: Capture request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/websocket.CaptureRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/websocket.CaptureResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Capture DOM from URL
+      tags:
+      - capture
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Check if the server is running
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health check endpoint
+      tags:
+      - health
+  /selector-configs:
+    get:
+      consumes:
+      - application/json
+      description: Get all selector configurations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/application.SelectorConfigResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all selector configs
+      tags:
+      - selector-config
+    post:
+      consumes:
+      - application/json
+      description: Create a new selector configuration
+      parameters:
+      - description: Create request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/application.CreateSelectorConfigRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/application.SelectorConfigResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new selector config
+      tags:
+      - selector-config
+  /selector-configs/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a selector configuration
+      parameters:
+      - description: Selector config ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete selector config
+      tags:
+      - selector-config
+    get:
+      consumes:
+      - application/json
+      description: Get a selector configuration by its ID
+      parameters:
+      - description: Selector config ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/application.SelectorConfigResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get selector config by ID
+      tags:
+      - selector-config
+    put:
+      consumes:
+      - application/json
+      description: Update a selector configuration
+      parameters:
+      - description: Selector config ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/application.UpdateSelectorConfigRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/application.SelectorConfigResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update selector config
+      tags:
+      - selector-config
+  /selector-configs/{id}/activate:
+    post:
+      consumes:
+      - application/json
+      description: Activate a selector configuration
+      parameters:
+      - description: Selector config ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/application.SelectorConfigResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Activate selector config
+      tags:
+      - selector-config
+  /selector-configs/{id}/deactivate:
+    post:
+      consumes:
+      - application/json
+      description: Deactivate a selector configuration
+      parameters:
+      - description: Selector config ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/application.SelectorConfigResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Deactivate selector config
+      tags:
+      - selector-config
+  /selector-configs/active:
+    get:
+      consumes:
+      - application/json
+      description: Get all active selector configurations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/application.SelectorConfigResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get active selector configs
+      tags:
+      - selector-config
+  /selector-configs/domain/{domain}:
+    get:
+      consumes:
+      - application/json
+      description: Get all selector configurations for a specific domain
+      parameters:
+      - description: Domain
+        in: query
+        name: domain
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/application.SelectorConfigResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get selector configs by domain
+      tags:
+      - selector-config
+  /selector-configs/name/{name}:
+    get:
+      consumes:
+      - application/json
+      description: Get a selector configuration by its name
+      parameters:
+      - description: Selector config name
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/application.SelectorConfigResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get selector config by name
+      tags:
+      - selector-config
+  /status:
+    get:
+      consumes:
+      - application/json
+      description: Get the current status of the server and connected clients
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get server status
+      tags:
+      - status
+swagger: "2.0"

@@ -1,0 +1,107 @@
+# Go Build Artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.a
+*.o
+*.test
+*.out
+
+# Go Workspace
+go.work
+go.work.sum
+go.sum
+
+# Dependency Directories
+vendor/
+
+# Go Cache
+go-build/
+go.sum
+
+# IDE Specific
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# OS Specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+config/local/
+config/*.local.*
+
+# Build Output
+dist/
+build/
+bin/
+output/
+
+# Logs
+*.log
+logs/
+*.err
+
+# Database
+*.db
+*.sqlite
+*.sql
+*.dump
+data/
+
+# Temporary Files
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup
+
+# Chrome Extension
+extension/*.crx
+extension/*.pem
+extension/*.zip
+extension/build/
+extension/dist/
+extension/node_modules/
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+.docker/
+
+# PostgreSQL/Redis Data
+postgres_data/
+redis_data/
+
+# Swagger Generated
+docs/swagger.json
+docs/swagger.yaml
+docs/promotion/
+
+# Coverage Reports
+coverage/
+*.coverprofile
+
+# Static Analysis
+*.lintresult
+
+# Archive Files
+*.zip
+*.tar.gz
+*.tar.bz2
+*.rar
+
+# Generated Icons
+extension/icons/*.png.bak
